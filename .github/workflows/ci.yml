@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: agentguard_test
+          POSTGRES_USER: agentguard
+          POSTGRES_PASSWORD: test-password-only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U agentguard -d agentguard_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://agentguard:test-password-only@localhost:5432/agentguard_test
+      REDIS_URL: redis://localhost:6379/15
+      AGENTGUARD_ENV: test
+      AGENTGUARD_CORS_ORIGINS: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ".[dev]"
+      - run: python -m ruff format --check backend/src backend/tests sdk/python/src sdk/python/tests
+      - run: python -m ruff check backend/src backend/tests sdk/python/src sdk/python/tests
+      - run: python -m mypy backend/src sdk/python/src
+      - run: alembic -c backend/alembic.ini upgrade head
+      - run: python -m pytest
+      - run: docker compose config
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "24" }
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+      - run: pnpm --filter @agentguard/frontend exec playwright install --with-deps chromium
+      - run: pnpm test

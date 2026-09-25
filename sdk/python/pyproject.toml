@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentguard-sdk"
+version = "0.1.0"
+description = "Python client foundation for AgentGuard"
+requires-python = ">=3.12"
+dependencies = ["httpx>=0.28,<1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentguard_sdk"]
+

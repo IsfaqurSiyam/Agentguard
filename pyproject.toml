@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentguard"
+version = "0.1.0"
+description = "Server-authoritative security gateway for autonomous AI agents"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "alembic>=1.14,<2",
+  "fastapi>=0.115,<1",
+  "psycopg[binary]>=3.2,<4",
+  "pydantic-settings>=2.6,<3",
+  "redis>=5.2,<6",
+  "sqlalchemy>=2.0,<3",
+  "structlog>=24.4,<26",
+  "uvicorn[standard]>=0.32,<1"
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx>=0.28,<1",
+  "mypy>=1.13,<2",
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.24,<1",
+  "ruff>=0.8,<1"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend/src/agentguard"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests", "sdk/python/tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["backend/src", "backend/tests", "sdk/python/src", "sdk/python/tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["backend/src", "sdk/python/src"]
+mypy_path = "backend/src:sdk/python/src"

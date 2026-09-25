@@ -1,0 +1,16 @@
+{
+  "name": "agentguard",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "pnpm --filter @agentguard/frontend dev",
+    "lint": "pnpm --filter @agentguard/frontend lint",
+    "typecheck": "pnpm --filter @agentguard/frontend typecheck",
+    "build": "pnpm --filter @agentguard/frontend build",
+    "test": "pnpm --filter @agentguard/frontend test"
+  },
+  "engines": {
+    "node": ">=22 <25",
+    "pnpm": ">=10"
+  }
+}
